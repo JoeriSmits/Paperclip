@@ -5,9 +5,17 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_PATH="${TEMPO_CONFIG_PATH:-$SCRIPT_DIR/tempo-config.json}"
 OUTPUT_DIR="${TEMPO_OUTPUT_DIR:-$SCRIPT_DIR/tempo-drafts}"
 DEFAULT_TZ="${TEMPO_TIMEZONE:-Europe/Amsterdam}"
-TARGET_DATE="${1:-$(date +%F)}"
+SUBMIT_FLAG="false"
+TARGET_DATE=""
+for arg in "$@"; do
+  case "$arg" in
+    --submit) SUBMIT_FLAG="true" ;;
+    *) TARGET_DATE="$arg" ;;
+  esac
+done
+TARGET_DATE="${TARGET_DATE:-$(date +%F)}"
 
-python3 - "$CONFIG_PATH" "$OUTPUT_DIR" "$TARGET_DATE" "$DEFAULT_TZ" <<'PY'
+python3 - "$CONFIG_PATH" "$OUTPUT_DIR" "$TARGET_DATE" "$DEFAULT_TZ" "$SUBMIT_FLAG" <<'PY'
 import base64
 import datetime as dt
 import json
@@ -246,8 +254,17 @@ def extract_jira_transitions(issue: dict, account_id: str, day_start: dt.datetim
 
 
 def calendar_events_for_day(day: dt.date, tz_name: str):
-    start = f"{day.isoformat()}T00:00:00+01:00"
-    end = f"{day.isoformat()}T23:59:59+01:00"
+    if ZoneInfo:
+        try:
+            local_tz = ZoneInfo(tz_name)
+        except Exception:
+            local_tz = dt.timezone(dt.timedelta(hours=1))
+    else:
+        local_tz = dt.timezone(dt.timedelta(hours=1))
+    day_start = dt.datetime.combine(day, dt.time(0, 0, 0), tzinfo=local_tz)
+    day_end = dt.datetime.combine(day, dt.time(23, 59, 59), tzinfo=local_tz)
+    start = day_start.isoformat()
+    end = day_end.isoformat()
     cmd = [
         "gog",
         "calendar",
@@ -291,6 +308,23 @@ def is_lunch(summary: str) -> bool:
     return any(x in s for x in ["lunch", "pauze", "break"])
 
 
+def submit_tempo_worklog(tempo_token: str, jira_account_id: str, row: dict) -> dict:
+    url = "https://api.tempo.io/4/worklogs"
+    headers = {
+        "Authorization": f"Bearer {tempo_token}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "issueKey": row["issueKey"],
+        "timeSpentSeconds": row["timeSpentSeconds"],
+        "startDate": row["startDate"],
+        "startTime": row["startTime"],
+        "description": row.get("description", ""),
+        "authorAccountId": jira_account_id,
+    }
+    return http_json(url, headers=headers, method="POST", payload=payload)
+
+
 def quantize_15m(seconds: int) -> int:
     if seconds <= 0:
         return 0
@@ -311,10 +345,11 @@ def build_description(data: dict) -> str:
 
 
 def main():
-    if len(sys.argv) != 5:
-        die("Usage: tempo-reconstruct.sh [YYYY-MM-DD]")
+    if len(sys.argv) != 6:
+        die("Usage: tempo-reconstruct.sh [--submit] [YYYY-MM-DD]")
 
-    config_path, output_dir, target_date, tz_name = sys.argv[1:5]
+    config_path, output_dir, target_date, tz_name, submit_flag = sys.argv[1:6]
+    do_submit = submit_flag == "true"
     config = load_json(config_path)
 
     rules = config.get("rules", {})
@@ -522,6 +557,26 @@ def main():
 
     print(out_path)
     print(json.dumps(rows, ensure_ascii=False))
+
+    if do_submit:
+        tempo_token = resolve_secret(config.get("tempo", {}).get("token", ""))
+        jira_account_id = config.get("jira", {}).get("accountId", "")
+        if not tempo_token:
+            die("Cannot submit: TEMPO_TOKEN not set")
+        if not jira_account_id:
+            die("Cannot submit: jira.accountId not configured")
+
+        print(f"\nSubmitting {len(rows)} worklog(s) to Tempo API...", file=sys.stderr)
+        for row in rows:
+            try:
+                result = submit_tempo_worklog(tempo_token, jira_account_id, row)
+                wl_id = result.get("tempoWorklogId", "?")
+                print(f"  OK: {row['issueKey']} ({row['timeSpentSeconds']}s) -> worklog {wl_id}", file=sys.stderr)
+            except RuntimeError as e:
+                print(f"  FAIL: {row['issueKey']} -> {e}", file=sys.stderr)
+        print("Submission complete.", file=sys.stderr)
+    else:
+        print("\nDraft only. Use --submit to post worklogs to Tempo API.", file=sys.stderr)
 
 
 if __name__ == "__main__":

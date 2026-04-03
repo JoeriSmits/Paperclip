@@ -2,6 +2,12 @@
 # Wrapper script for running Tempo hours reconstruction as a cron job.
 # Loads required secrets from OpenClaw .env and runs tempo-reconstruct.sh
 # for the previous workday.
+#
+# Why launchd instead of a Paperclip scheduled trigger:
+# This script needs local filesystem access (config files, env secrets, gog CLI)
+# and produces local output files. Paperclip triggers wake agents for coordination
+# work — using one here would add agent heartbeat overhead just to shell out to
+# this same script. launchd runs it directly with zero overhead.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -32,6 +38,6 @@ fi
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Running tempo-reconstruct for $TARGET"
 
-"$SCRIPT_DIR/tempo-reconstruct.sh" "$TARGET" 2>&1 | tee "$LOG_DIR/tempo-$TARGET.log"
+"$SCRIPT_DIR/tempo-reconstruct.sh" --submit "$TARGET" 2>&1 | tee "$LOG_DIR/tempo-$TARGET.log"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Done"
