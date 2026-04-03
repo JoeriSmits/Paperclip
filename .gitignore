@@ -35,3 +35,6 @@ __pycache__/
 # Tempo draft logs (regenerated daily)
 **/tempo-drafts/
 **/tempo-logs/
+
+# Config files with API keys/tokens (Discord, TMDB, etc.)
+**/projects/**/*-config.json
