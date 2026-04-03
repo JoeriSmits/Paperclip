@@ -34,8 +34,8 @@ git commit -m "chore: daily workspace sync $(date +%Y-%m-%d)" \
 
 # Push if remote is configured
 if git remote get-url origin >/dev/null 2>&1; then
-  GIT_SSH_COMMAND="ssh -i $HOME/.ssh/automation_ed25519 -o IdentitiesOnly=yes" \
-    git push origin main >> "$LOG_FILE" 2>&1
+  # Use gh CLI for authentication (gh auth setup-git configures credential helper)
+  git push origin main >> "$LOG_FILE" 2>&1
   log "Pushed to remote"
 else
   log "No remote configured — commit only (local backup)"
