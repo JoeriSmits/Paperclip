@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>nl.webbio.paperclip.films-cron</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/joerismits/.paperclip/instances/default/projects/712f694b-097f-4ca4-b161-f299187ec27d/2d1aac53-a8ad-4685-9db7-0fcf2e80fc4d/_default/run-films-cron.sh</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>5</integer>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/tmp/films-cron-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/films-cron-stderr.log</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/joerismits/.paperclip/instances/default/projects/712f694b-097f-4ca4-b161-f299187ec27d/2d1aac53-a8ad-4685-9db7-0fcf2e80fc4d/_default</string>
+</dict>
+</plist>

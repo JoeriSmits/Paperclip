@@ -1,0 +1,20 @@
+- id: obsidian-vault-symlink-fix
+  date: "2026-04-03"
+  fact: "Obsidian on macOS does not follow directory-level symlinks properly. Replaced with real directories containing file-level symlinks to agent workspace files."
+  source: JOEA-5
+  confidence: confirmed
+  status: active
+
+- id: obsidian-vault-sync-script
+  date: "2026-04-03"
+  fact: "A sync script .sync-vault.sh exists in the vault root to re-sync file symlinks when agents create new files in their workspaces."
+  source: JOEA-5
+  confidence: confirmed
+  status: active
+
+- id: obsidian-vault-path
+  date: "2026-04-03"
+  fact: "Obsidian vault path: ~/.paperclip/instances/default/vault/"
+  source: JOEA-5
+  confidence: confirmed
+  status: active

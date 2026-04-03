@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>nl.webbio.paperclip.workspace-sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/joerismits/.paperclip/instances/default/projects/712f694b-097f-4ca4-b161-f299187ec27d/2d1aac53-a8ad-4685-9db7-0fcf2e80fc4d/_default/run-workspace-sync.sh</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>23</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>/Users/joerismits</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/paperclip-workspace-sync-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/paperclip-workspace-sync-stderr.log</string>
+</dict>
+</plist>

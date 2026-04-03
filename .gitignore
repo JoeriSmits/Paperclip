@@ -1,0 +1,37 @@
+# Paperclip workspace git backup
+# Exclude large/binary/sensitive data
+
+# PostgreSQL data directory
+instances/*/db/
+
+# Runtime logs
+instances/*/logs/
+
+# Secrets (master key, encrypted vault keys)
+instances/*/secrets/
+
+# Environment files with secrets
+instances/*/.env
+.env
+
+# Runtime data (run-logs, storage blobs)
+instances/*/data/run-logs/
+instances/*/data/storage/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Temp files
+*.tmp
+*.swp
+
+# Poster images (large binaries)
+**/films-posters/
+
+# Tempo draft logs (regenerated daily)
+**/tempo-drafts/
+**/tempo-logs/

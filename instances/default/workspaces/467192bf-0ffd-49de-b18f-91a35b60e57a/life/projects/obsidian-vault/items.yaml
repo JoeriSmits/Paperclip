@@ -1,0 +1,21 @@
+- id: obsidian-vault-no-symlinks
+  date: "2026-04-03"
+  fact: "Obsidian on macOS does not index symlinks at all — neither directory-level nor file-level. All vault content must be real file copies."
+  source: JOEA-5
+  confidence: confirmed
+  status: active
+  supersedes: obsidian-vault-symlink-fix
+
+- id: obsidian-vault-rsync
+  date: "2026-04-03"
+  fact: "Sync script .sync-vault.sh uses rsync to copy workspace files into the vault. Must be run after agents write new data."
+  source: JOEA-5
+  confidence: confirmed
+  status: active
+
+- id: obsidian-vault-path
+  date: "2026-04-03"
+  fact: "Obsidian vault path: ~/.paperclip/instances/default/vault/"
+  source: JOEA-5
+  confidence: confirmed
+  status: active

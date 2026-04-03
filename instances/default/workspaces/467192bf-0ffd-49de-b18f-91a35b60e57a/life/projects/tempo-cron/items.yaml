@@ -1,0 +1,20 @@
+- id: tempo-cron-001
+  type: fact
+  date: "2026-04-03"
+  status: active
+  content: "Tempo hours cron migrated from OpenClaw to Paperclip project workspace. Core script unchanged; wrapper and launchd plist added."
+  source: "JOEA-10 migration work"
+
+- id: tempo-cron-002
+  type: fact
+  date: "2026-04-03"
+  status: active
+  content: "gog CLI OAuth token expired — Google Calendar events unavailable. Needs `gog auth` re-authentication by Joeri."
+  source: "runtime test during migration"
+
+- id: tempo-cron-003
+  type: fact
+  date: "2026-04-03"
+  status: active
+  content: "launchd plist created but not installed. Board needs to run: cp plist ~/Library/LaunchAgents/ && launchctl load it."
+  source: "JOEA-10 delivery"

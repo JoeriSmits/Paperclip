@@ -1,0 +1,13 @@
+{
+  "showLineNumber": true,
+  "strictLineBreaks": false,
+  "readableLineLength": true,
+  "defaultViewMode": "preview",
+  "foldHeading": true,
+  "showFrontmatter": true,
+  "useMarkdownLinks": false,
+  "newFileLocation": "current",
+  "attachmentFolderPath": "_attachments",
+  "alwaysUpdateLinks": true,
+  "promptDelete": false
+}

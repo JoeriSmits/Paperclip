@@ -1,0 +1,47 @@
+- id: joeri-001
+  fact: "Joeri is owner and technical director of Webbio, a web dev agency in the Netherlands specializing in public sector clients"
+  source: openclaw/USER.md + MEMORY.md
+  created: 2026-04-03
+  status: active
+
+- id: joeri-002
+  fact: "Joeri runs joeri.dev as personal brand for consulting, websites for friends/family, thought leadership in software and AI"
+  source: openclaw/company-goal
+  created: 2026-04-03
+  status: active
+
+- id: joeri-003
+  fact: "Communication style: short, direct, no filler. Dutch or English. Dislikes unnecessary pings. Only notify for urgent/unexpected things."
+  source: openclaw/USER.md
+  created: 2026-04-03
+  status: active
+
+- id: joeri-004
+  fact: "Hates logging hours in Tempo, which is why it's automated via cron (daily 17:30 weekdays)"
+  source: openclaw/USER.md + MEMORY.md
+  created: 2026-04-03
+  status: active
+
+- id: joeri-005
+  fact: "Uses Discord as primary command interface for AI agents, Slack (#ai-burgerinformatie) for team research output"
+  source: openclaw/MEMORY.md
+  created: 2026-04-03
+  status: active
+
+- id: joeri-006
+  fact: "Infra: Mac mini as home base for all cron, monitoring, webhook servers. Tailscale IP 100.86.121.74"
+  source: openclaw/MEMORY.md
+  created: 2026-04-03
+  status: active
+
+- id: joeri-007
+  fact: "Webbio team: Nick, Arjan, Koen, Martijn, Haye, Mike, Huib, Collin"
+  source: openclaw/MEMORY.md
+  created: 2026-04-03
+  status: active
+
+- id: joeri-008
+  fact: "Webbio strategic pivot: specialist public sector, 'betrouwbaar informeren van burgers in het AI-tijdperk', 6 pain points P1-P6"
+  source: openclaw/MEMORY.md
+  created: 2026-04-03
+  status: active
