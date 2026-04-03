@@ -18,6 +18,9 @@ instances/*/.env
 instances/*/data/run-logs/
 instances/*/data/storage/
 
+# Database backups (large, potentially sensitive)
+instances/*/data/backups/
+
 # Python cache
 __pycache__/
 *.pyc
