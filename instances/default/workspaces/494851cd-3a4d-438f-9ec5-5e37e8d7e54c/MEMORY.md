@@ -39,6 +39,7 @@ Goals → Me (plan & assign) → Mitch (build) → Tommy (QA) → Me (goal valid
 ## Company Context
 
 - joeri.dev: Joeri's personal company, side consulting + websites for friends/family
+- **joeri.dev website and new website builds are OUT OF SCOPE** (board directive 2026-04-05, JOEA-121). Do not create tasks for joeri.dev website, blog, analytics, or new website projects.
 - Also CTO at Webbio (web dev agency, public sector)
 - OpenClaw was the predecessor system, being migrated to Paperclip
 - Key integrations: Picnic (groceries), Buffer (LinkedIn), Tempo (hours), GoCardless (bank), Discord
