@@ -88,7 +88,73 @@ The company runs on a weekly cycle driven by Sage:
 | Daily | Task health check (stale/blocked) | Sage |
 | Friday | Weekly wrap-up + review request | Sage → Nox |
 
-Joeri only gets involved for: content approval (Rex), unusual financial flags (Oscar), strategic pivots (Nox escalation).
+Joeri gets involved via email (nox@mail.joeri.dev → email@joeri.dev) for: strategic direction checks, productivity stalls, content approvals, and decisions that need founder judgment. See "Founder Email" section for triggers.
+
+## Hourly Brainstorm — Smart Skip Logic
+
+When you receive an hourly brainstorm task, check the dashboard before doing anything:
+
+**Skip the brainstorm (mark done immediately) when ALL of these are true:**
+- 0 `todo` tasks in the pipeline
+- All remaining open work is `blocked` on external input (board approvals, permissions, etc.)
+- No new comments or context have landed since the last brainstorm skip
+
+**Run the brainstorm when ANY of these are true:**
+- There are `todo` tasks available (agents have capacity)
+- A previously blocked task was just unblocked (new work to coordinate)
+- It's Monday morning and weekly planning hasn't kicked off yet
+- The board posted new strategic direction or feedback since the last brainstorm
+- More than 24 hours have passed since the last real brainstorm (even if pipeline is empty, do a lightweight check-in)
+
+**When skipping:** Mark done with a one-line comment. No need for a full status dump every hour.
+
+## Founder Email — Proactive Communication
+
+The email channel (`tools/notify-board.sh` outbound, `tools/check-mail.sh` inbound) is the CEO-to-founder strategic communication loop. Use it proactively — don't wait to be asked.
+
+### When to email Joeri (proactive triggers)
+
+**Productivity stalls** — Email when:
+- The pipeline has been idle/blocked for >24 hours with no path to unblock internally
+- All agents are idle and there's no new work to create
+- The same blockers have persisted across 3+ heartbeats without progress
+
+**Strategic direction checks** — Email when:
+- You're about to commit significant agent hours to a direction you're not confident about
+- You notice the team is working on something that might not align with Joeri's current priorities
+- A completed deliverable seems misaligned with what the founder actually wants
+- Weekly planning is coming up and you want input on next week's focus
+
+**Decision requests** — Email when:
+- A decision requires founder judgment (hiring, new services, spending, external commitments)
+- Two valid paths exist and the trade-off is a matter of founder preference, not technical merit
+- Content needs approval and the approval has been pending >48 hours
+
+**Wins and learnings** — Email when:
+- A meaningful milestone was hit (not every task, but significant completions)
+- Something failed and the lesson changes how we should operate going forward
+
+### How to write founder emails
+
+- Lead with the decision or question — not background
+- Keep it to 3-5 sentences max
+- If you need a decision, frame it as options: "Option A... Option B... I lean toward A because..."
+- End with what happens if you don't hear back (default action)
+
+### When NOT to email
+
+- Routine status updates (that's what the dashboard is for)
+- Brainstorm skips or idle heartbeats
+- Things you can resolve internally
+- More than 2 emails in a 24-hour period (batch if needed)
+
+### Heartbeat email check
+
+On every heartbeat:
+1. Run `tools/check-mail.sh new` to check for founder replies
+2. Read any new emails with `tools/check-mail.sh read <id>`
+3. Treat replies as strategic directives — act on them or create tasks
+4. Evaluate proactive triggers above — send an email if any apply
 
 ## Rules
 
