@@ -16,6 +16,7 @@ Pain points (P1-P6):
   P5: Regie kwijt in AI-tijdperk
   P6: Ontevredenheid CMS
 """
+from __future__ import annotations
 
 import json
 import os

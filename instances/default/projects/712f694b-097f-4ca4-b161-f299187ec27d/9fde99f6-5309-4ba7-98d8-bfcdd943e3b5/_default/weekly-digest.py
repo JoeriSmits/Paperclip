@@ -3,15 +3,16 @@
 Weekly AI Research Digest — Webbio positioning & thought leadership.
 
 Aggregates the week's AI/government/public sector news from RSS feeds,
-uses Claude to synthesize a structured digest, and posts to Slack.
+synthesizes a structured digest, and posts to Slack.
 
-Structure:
-  - Top 3 developments of the week
-  - What it means for public sector clients
-  - Joeri's take (1-sentence LinkedIn angle per item)
-  - 1 actionable recommendation / talking point for client conversations
+Modes:
+  (default)      -- standalone: fetch feeds, call Anthropic API, post to Slack
+  --fetch-json   -- agent mode: fetch feeds, output articles + prompt as JSON
+  --post-digest FILE -- agent mode: post pre-generated digest text to Slack
+  --dry-run      -- print digest to stdout instead of posting
+  --no-claude    -- skip Claude synthesis (with --dry-run: show article list only)
 
-Schedule: Friday 16:00 Europe/Amsterdam
+Schedule: Friday 16:00 Europe/Amsterdam (via Paperclip routine or LaunchAgent)
 Slack channel: C0AHZGX4F0A (#ai-burgerinformatie)
 """
 
@@ -194,28 +195,8 @@ def post_to_slack(blocks: list[dict], channel: str, bot_token: str, fallback_tex
         return False
 
 
-def main():
-    config_path = Path(__file__).parent / "ai-news-config.json"
-    config = {}
-    if config_path.exists():
-        with open(config_path) as f:
-            config = json.load(f)
-
-    bot_token = config.get("slack_bot_token", os.environ.get("SLACK_BOT_TOKEN", ""))
-    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    channel = config.get("slack_channel", SLACK_CHANNEL)
-    dry_run = "--dry-run" in sys.argv
-    no_claude = "--no-claude" in sys.argv
-
-    if not anthropic_key and not no_claude:
-        print("Error: ANTHROPIC_API_KEY not set", file=sys.stderr)
-        sys.exit(1)
-
-    if not bot_token and not dry_run:
-        print("Error: SLACK_BOT_TOKEN not set", file=sys.stderr)
-        sys.exit(1)
-
-    # Fetch feeds (last 7 days)
+def fetch_and_score_articles() -> tuple[list[dict], dict, int]:
+    """Fetch RSS feeds, score, deduplicate, return (top_items, pain_points, total_count)."""
     cutoff = datetime.now(timezone.utc) - timedelta(days=DIGEST_LOOKBACK_DAYS)
     all_items = []
     feed_errors = []
@@ -234,10 +215,8 @@ def main():
     print(f"\nTotal: {len(all_items)} items from {len(scanner.RSS_FEEDS) - len(feed_errors)}/{len(scanner.RSS_FEEDS)} feeds", file=sys.stderr)
 
     if not all_items:
-        print("No items found. Exiting.", file=sys.stderr)
-        sys.exit(0)
+        return [], {}, 0
 
-    # Score and rank
     scored_pain_points = {}
     scored = []
     for item in all_items:
@@ -250,9 +229,130 @@ def main():
     scored.sort(key=lambda x: x[0], reverse=True)
     print(f"After relevance filter: {len(scored)} items", file=sys.stderr)
 
-    # Deduplicate and take top N for synthesis
     candidates = scanner.deduplicate([item for _, item in scored])
     top_items = candidates[:MAX_ITEMS_FOR_SYNTHESIS]
+
+    return top_items, scored_pain_points, len(all_items)
+
+
+def get_amsterdam_now() -> datetime:
+    """Get current time in Amsterdam (approximate DST)."""
+    utc_now = datetime.now(timezone.utc)
+    month = utc_now.month
+    amsterdam_offset = timedelta(hours=2 if 3 < month < 10 else 1)
+    return utc_now + amsterdam_offset
+
+
+def mode_fetch_json(config: dict):
+    """Agent mode: fetch articles and output JSON with prompt for agent synthesis."""
+    top_items, scored_pain_points, total_count = fetch_and_score_articles()
+
+    if len(top_items) < 3:
+        json.dump({"status": "skip", "reason": f"Only {len(top_items)} relevant items found, need 3+", "item_count": len(top_items)}, sys.stdout)
+        return
+
+    prompt = build_synthesis_prompt(top_items, scored_pain_points)
+
+    # Serialize articles for reference
+    articles = []
+    for item in top_items:
+        pains = scored_pain_points.get(id(item), [])
+        articles.append({
+            "title": item["title"],
+            "source": item["source"],
+            "link": item["link"],
+            "description": item["description"][:200],
+            "pain_points": pains,
+        })
+
+    json.dump({
+        "status": "ready",
+        "total_scanned": total_count,
+        "article_count": len(top_items),
+        "articles": articles,
+        "synthesis_prompt": prompt,
+        "slack_channel": config.get("slack_channel", SLACK_CHANNEL),
+    }, sys.stdout, ensure_ascii=False)
+
+
+def mode_post_digest(digest_file: str, config: dict):
+    """Agent mode: post a pre-generated digest to Slack."""
+    bot_token = config.get("slack_bot_token", os.environ.get("SLACK_BOT_TOKEN", ""))
+    channel = config.get("slack_channel", SLACK_CHANNEL)
+
+    if not bot_token:
+        print("Error: SLACK_BOT_TOKEN not set", file=sys.stderr)
+        sys.exit(1)
+
+    if digest_file == "-":
+        digest_text = sys.stdin.read()
+    else:
+        with open(digest_file) as f:
+            digest_text = f.read()
+
+    if not digest_text.strip():
+        print("Error: empty digest text", file=sys.stderr)
+        sys.exit(1)
+
+    # Try to parse as JSON (agent may wrap with metadata)
+    try:
+        parsed = json.loads(digest_text)
+        if isinstance(parsed, dict) and "digest" in parsed:
+            digest_text = parsed["digest"]
+            total_count = parsed.get("total_scanned", 0)
+        else:
+            total_count = 0
+    except (json.JSONDecodeError, KeyError):
+        total_count = 0
+
+    now = get_amsterdam_now()
+    blocks = format_slack_digest(digest_text, now, total_count)
+    week_num = now.isocalendar()[1]
+    fallback = f"\U0001f4cb Wekelijks AI Digest \u2014 Week {week_num}"
+    success = post_to_slack(blocks, channel, bot_token, fallback)
+
+    if success:
+        print(f"Posted weekly digest to Slack #{channel}.", file=sys.stderr)
+    else:
+        print("Failed to post to Slack.", file=sys.stderr)
+        sys.exit(1)
+
+
+def main():
+    config_path = Path(__file__).parent / "ai-news-config.json"
+    config = {}
+    if config_path.exists():
+        with open(config_path) as f:
+            config = json.load(f)
+
+    # --- Agent mode: fetch articles as JSON ---
+    if "--fetch-json" in sys.argv:
+        mode_fetch_json(config)
+        return
+
+    # --- Agent mode: post pre-generated digest ---
+    if "--post-digest" in sys.argv:
+        idx = sys.argv.index("--post-digest")
+        digest_file = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else "-"
+        mode_post_digest(digest_file, config)
+        return
+
+    # --- Standalone mode (original behavior) ---
+    bot_token = config.get("slack_bot_token", os.environ.get("SLACK_BOT_TOKEN", ""))
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    channel = config.get("slack_channel", SLACK_CHANNEL)
+    dry_run = "--dry-run" in sys.argv
+    no_claude = "--no-claude" in sys.argv
+
+    if not anthropic_key and not no_claude:
+        print("Error: ANTHROPIC_API_KEY not set. Use --fetch-json for agent mode.", file=sys.stderr)
+        sys.exit(1)
+
+    if not bot_token and not dry_run:
+        print("Error: SLACK_BOT_TOKEN not set", file=sys.stderr)
+        sys.exit(1)
+
+    top_items, scored_pain_points, total_count = fetch_and_score_articles()
 
     if len(top_items) < 3:
         print(f"Only {len(top_items)} relevant items found. Need at least 3 for a digest. Skipping.", file=sys.stderr)
@@ -260,10 +360,9 @@ def main():
 
     print(f"\nSynthesizing digest from top {len(top_items)} items using Claude...", file=sys.stderr)
 
-    # Build prompt and call Claude
     prompt = build_synthesis_prompt(top_items, scored_pain_points)
 
-    if dry_run and "--no-claude" in sys.argv:
+    if dry_run and no_claude:
         print("\n--- DRY RUN (no Claude) ---\n")
         for i, item in enumerate(top_items, 1):
             pains = scored_pain_points.get(id(item), [])
@@ -279,19 +378,13 @@ def main():
     if dry_run:
         print("\n--- DRY RUN ---\n")
         print(digest_text)
-        print(f"\n--- Digest synthesized from {len(top_items)} items ({len(all_items)} total scanned) ---")
+        print(f"\n--- Digest synthesized from {len(top_items)} items ({total_count} total scanned) ---")
         return
 
-    # Amsterdam time
-    utc_now = datetime.now(timezone.utc)
-    month = utc_now.month
-    amsterdam_offset = timedelta(hours=2 if 3 < month < 10 else 1)
-    amsterdam_now = utc_now + amsterdam_offset
-
-    # Format and post
-    blocks = format_slack_digest(digest_text, amsterdam_now, len(all_items))
-    week_num = amsterdam_now.isocalendar()[1]
-    fallback = f"📋 Wekelijks AI Digest — Week {week_num}"
+    now = get_amsterdam_now()
+    blocks = format_slack_digest(digest_text, now, total_count)
+    week_num = now.isocalendar()[1]
+    fallback = f"\U0001f4cb Wekelijks AI Digest \u2014 Week {week_num}"
     success = post_to_slack(blocks, channel, bot_token, fallback)
 
     if success:
