@@ -1,0 +1,8 @@
+- id: joeridev-001
+  fact: "Joeri directed 'Pause for now' on 2026-04-08 — team should stay on standby until he provides new direction. No autonomous work creation."
+  source: "Email reply from email@joeri.dev, Subject: Re: [joeri.dev] Team idle — what should we focus on next?"
+  date: "2026-04-08"
+  status: active
+  tags: [directive, strategic, pause]
+  access_count: 1
+  last_accessed: "2026-04-10"

@@ -1,0 +1,20 @@
+- id: linkedin-dash-001
+  fact: "Joeri directed focus to LinkedIn dashboard as top priority via email 2026-04-09"
+  source: "email from Joeri, 2026-04-09 07:50 UTC"
+  confidence: 1.0
+  created: "2026-04-10"
+  status: active
+
+- id: linkedin-dash-002
+  fact: "Dashboard URL is http://100.86.121.74:3200/, tracked as JOEA-219"
+  source: "email from Joeri + Paperclip issues"
+  confidence: 1.0
+  created: "2026-04-10"
+  status: active
+
+- id: linkedin-dash-003
+  fact: "Joeri wants the dashboard to be his hub for managing posts, generating new ones, sharing knowledge and transcripts"
+  source: "email from Joeri, 2026-04-09 07:50 UTC"
+  confidence: 1.0
+  created: "2026-04-10"
+  status: active

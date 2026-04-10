@@ -1,0 +1,5 @@
+=== Films Digest run: 2026-04-10T08:00:05Z ===
+Traceback (most recent call last):
+  File "/Users/joerismits/.paperclip/instances/default/projects/712f694b-097f-4ca4-b161-f299187ec27d/2d1aac53-a8ad-4685-9db7-0fcf2e80fc4d/_default/films-digest.py", line 81, in <module>
+    def discord_api(method: str, url: str, headers: dict, data: dict | None = None) -> dict:
+TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'
