@@ -76,3 +76,8 @@ Goals → Sage (plan & assign) → Mitch (build) → Tommy (QA) → Sage (goal v
 - Discord buttons: type "actions" works, "buttons" doesn't. Need `reusable: true`.
 - yt-dlp needs `--impersonate chrome` for YouTube. Thumbnail check for video existence.
 - Gateway stability: Slack WebSocket caused crashes. Discord-only is stable.
+
+## Paperclip API Pitfalls
+- Mutations (PATCH, POST checkout, etc.) require `X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID` — must match the env var, NOT a fresh `uuidgen`. Activity log FK references `heartbeat_runs` and rejects unknown run ids with 500.
+- To comment+close a task in one call: `PATCH /api/issues/:id {"status":"done","comment":"..."}`. `POST /api/issues/:id/comments` currently returns 500 — avoid.
+- Checkout body shape: `{"agentId":"...","expectedStatuses":["todo","in_progress"]}`. If the issue already has `executionRunId` matching your run, checkout returns 409 — you already have the lock, just proceed.
