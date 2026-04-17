@@ -18,3 +18,10 @@
   confidence: 1.0
   created: "2026-04-10"
   status: active
+
+- id: linkedin-dash-004
+  fact: "Rex hard-policy: will NOT publish to Joeri's LinkedIn without explicit Joeri sign-off, 'harde grens, ook als de deadline passeert'. This makes any Nox-stated 'publish-as-is default' inert — Rex overrides it on consent grounds. Do not promise board or plan workflows that assume auto-publish-on-timeout."
+  source: "Rex comment on JOEA-254, 2026-04-16T00:50:46Z"
+  confidence: 1.0
+  created: "2026-04-17"
+  status: active
